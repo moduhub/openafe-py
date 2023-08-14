@@ -62,6 +62,21 @@ def getChecksumIntegerFromString(checksumString):
 	return integerChecksum
 
 
+def sendCommandToMCU(command):
+	"""
+	The function `sendCommandToMCU` sends a command to a microcontroller unit (MCU) by calculating a
+	checksum, constructing a full command string, and writing it to a serial port.
+	
+	:param command: The `command` parameter is a string that represents the command to be sent to the
+	MCU (Microcontroller Unit), e.g.: "CVW,500,-500,250,2,1".
+	"""
+	checksumString = hex(calculateChecksumOfString(command))
+	checksumString = checksumString[2:] # removes the "0x"
+	fullCommand = "$" + command + "*" + checksumString
+	print("full command sent: ", fullCommand)
+	ser.write(fullCommand.encode("utf-8"))
+
+
 def plotPoints(queVoltage, queCurrent):
 	"""
 	The function "plotPoints" plots points on a graph and sets the y-axis range.
@@ -104,7 +119,8 @@ while True:
 
 	elif messageReceived == "MSG,RDY":
 		# ser.write(b"$CVW,500,-500,250,10,2*47")
-		ser.write(b"$CVW,500,-500,250,2,1*77")
+		# ser.write(b"$CVW,500,-500,250,2,1*77")
+		sendCommandToMCU("CVW,500,-500,250,2,1")
 
 		messageReceived = getMessageFromOpenAFE() 
 
