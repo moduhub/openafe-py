@@ -46,7 +46,6 @@ while True:
 			queCurrent.append(current)
 	
 			# PLOTTING THE POINTS
-			if 
 			plt.plot(queVoltage, queCurrent)
 			# plt.scatter(range(len(queVoltage)),queVoltage)
 
