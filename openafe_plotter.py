@@ -92,7 +92,6 @@ def sendCommandToMCU(command):
 	checksumString = hex(calculateChecksumOfString(command))
 	checksumString = checksumString[2:] # removes the "0x"
 	fullCommand = "$" + command + "*" + checksumString
-	print("full command sent: ", fullCommand)
 	ser.write(fullCommand.encode("utf-8"))
 
 
@@ -166,15 +165,23 @@ while True:
 			scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles, settlingTime_milliseconds)
 
 		messageReceived = getMessageFromOpenAFE() 
-
-		while messageReceived != "MSG,END":
+		if messageReceived[:-4] == "ERR":
+			print("*** ERROR: MCU declined command")
+			break
+		
+		while True:
 			messageReceived = getMessageFromOpenAFE()
 			point = messageReceived[4:] 
-			print(messageReceived[4:])
+			# print(messageReceived[4:]) # De-comment to print the voltammetry points
 			
 			if messageReceived == "MSG,END":
 				plotPoints(queVoltage, queCurrent)
+				print("INFO: Voltammetry finished!") 
 				plt.pause(60)
+				break
+			
+			if messageReceived[:-4] == "ERR":
+				print("*** ERROR: An error ocurred")
 				break
 
 			elif messageReceived != -1: # if message is valid
@@ -190,5 +197,3 @@ while True:
 					plotPoints(queVoltage, queCurrent)
 			
 		break
-
-print("finished! UHUL!!!!") 
