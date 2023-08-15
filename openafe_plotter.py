@@ -1,7 +1,3 @@
-import matplotlib.pyplot as plt
-from collections import deque
-import serial
-
 # Adjust the parameters below according to your needs:
 # 
 # NOTE: Keep in mind that some voltammetry waves may not be 
@@ -10,7 +6,6 @@ import serial
 # Comment or de-comment the voltammetry type as needed.
 # 
 # Parameters:
-
 voltammetryType = "CV" # Cyclic Voltammetry
 # voltammetryType = "DPV" # Differential Pulse Voltammetry (NOT YET IMPLEMENTED)
 # voltammetryType = "SW" # Square Wave (NOT YET IMPLEMENTED)
@@ -25,6 +20,11 @@ settlingTime_milliseconds = 0 # (NOT YET IMPLETMENTED)
 graphTitle = "H2O + NaCl Cyclic Voltammetry" # the graph title to be displayed, can be left in blank
 graphSubTitle = "" # the graph sub title, can be left blank
 gridVisible = True # Change to True or False, to make the grid visible or hidden, respectively
+
+
+import matplotlib.pyplot as plt
+from collections import deque
+import serial
 
 
 def getMessageFromOpenAFE():
