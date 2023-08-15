@@ -120,7 +120,7 @@ def plotPoints(queVoltage, queCurrent):
 	plt.plot(queVoltage, queCurrent)
 
 	# SET Y AXIS RANGE
-	plt.xlim(-600,600)
+	plt.xlim(startingPotential_millivolts - 100, endingPotential_millivolts + 100)
 
 	# DRAW, PAUSE AND CLEAR
 	plt.draw()
