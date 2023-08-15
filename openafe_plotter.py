@@ -21,6 +21,11 @@ stepSize_millivolts = 2
 numberOfCycles = 1
 settlingTime_milliseconds = 0 # (NOT YET IMPLETMENTED)
 
+# Graph Options:
+graphTitle = "H2O + NaCl Cyclic Voltammetry" # the graph title to be displayed, can be left in blank
+graphSubTitle = "" # the graph sub title, can be left blank
+gridVisible = True # Change to True or False, to make the grid visible or hidden, respectively
+
 
 def getMessageFromOpenAFE():
 	"""
@@ -104,8 +109,14 @@ def plotPoints(queVoltage, queCurrent):
 	:param queCurrent: The queCurrent parameter represents the list of current values that you want to
 	plot on the y-axis. Each value in the list corresponds to a specific point on the plot
 	"""
-	# PLOTTING THE POINTS
 	plt.clf()
+	plt.suptitle(graphTitle)
+	plt.title(graphSubTitle)
+	plt.xlabel('Voltage (mV)')
+	plt.ylabel('Current (uA)')
+	plt.grid(visible=gridVisible)
+
+	# PLOTTING THE POINTS
 	plt.plot(queVoltage, queCurrent)
 
 	# SET Y AXIS RANGE
@@ -113,7 +124,7 @@ def plotPoints(queVoltage, queCurrent):
 
 	# DRAW, PAUSE AND CLEAR
 	plt.draw()
-	plt.pause(0.1)
+	plt.pause(0.05)
 
 
 def makeCyclicVoltammetry(endingPotential, startingPotential, scanRate, stepSize, numberOfCycles, settlingTime):
@@ -148,10 +159,6 @@ queVoltage = deque(maxlen = 2000)
 queCurrent = deque(maxlen = 2000)
 
 ser = serial.Serial('COM6', 115200)
-
-# Show the plot
-plt.show(block=False)
-plt.xlim(-600,600)
 
 while True:
 	messageReceived = getMessageFromOpenAFE()
