@@ -177,7 +177,7 @@ while True:
 			if messageReceived == "MSG,END":
 				plotPoints(queVoltage, queCurrent)
 				print("INFO: Voltammetry finished!") 
-				plt.pause(60)
+				plt.show()
 				break
 			
 			if messageReceived[:-4] == "ERR":
