@@ -5,7 +5,7 @@ This script talks to a device running [OpenAFE Comm](), giving the device the ne
 
 > NOTE: The DPV and SWV processes are not yet implemented.
 
-![plotterexample](images\openafeplotter.png)
+![plotterexample](https://github.com/ig-66/OpenAFE_PythonPlotter/blob/main/images/openafeplotter.png)
 
 # External Requirements
 - An Arduino Uno running [OpenAFE Comm]().
