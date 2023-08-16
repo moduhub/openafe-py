@@ -1,9 +1,11 @@
 import serial
 
 class OpenAFE:
-	
-	def __init__(self, comPort):
+
+	def __init__(self, comPort, voltammetryPointCallback=None, voltammetryEndCallback=None):
 		self.ser = serial.Serial(comPort, 115200)
+		self.voltammetryPointCallback = voltammetryPointCallback
+		self.voltammetryEndCallback = voltammetryEndCallback
 
 
 	def getMessageFromOpenAFE(self):
@@ -102,3 +104,55 @@ class OpenAFE:
 		CVCommandString = "CVW," + str(endingPotential) + "," + str(startingPotential) + \
 		"," + str(scanRate) + "," + str(stepSize) + "," + str(numberOfCycles)
 		self.sendCommandToMCU(CVCommandString) # send the CV command
+
+
+	def receiveVoltammetryPoints(self):
+		"""
+		The function `receiveVoltammetryPoints` receives messages from OpenAFE, processes the received
+		points, and calls the appropriate callbacks.
+		"""
+		while True:
+			messageReceived = self.getMessageFromOpenAFE()
+			point = messageReceived[4:]
+
+			if messageReceived == "MSG,END":
+				self._onVoltammetryEnd()
+				break
+			
+			if messageReceived[:-4] == "ERR":
+				print("*** ERROR: An error ocurred")
+				break
+
+			elif messageReceived != -1: # if message is valid
+				pointObjs = point.split(',')
+
+				voltage = float(pointObjs[0])
+				current = float(pointObjs[1])
+
+				self._onVoltammetryPoint(voltage, current)
+
+
+	def _onVoltammetryPoint(self, voltage, current):
+		"""
+		NOTE: PRIVATE METHOD, DO NOT CALL IT!
+
+		The `_onVoltammetryPoint` function takes in a voltage and current value and calls a callback function
+		if it exists.
+		
+		:param voltage: The voltage value at a specific point in a voltammetry experiment
+		:param current: The current parameter represents the measured electric current in the voltammetry
+		experiment
+		"""
+		if self.voltammetryPointCallback and callable(self.voltammetryPointCallback):
+			self.voltammetryPointCallback(voltage, current)
+
+
+	def _onVoltammetryEnd(self):
+		"""
+		NOTE: PRIVATE METHOD, DO NOT CALL IT!
+
+		The function `_onVoltammetryEnd` checks if a callback function `voltammetryEndCallback` is defined and
+		callable, and if so, it calls the callback function.
+		"""
+		if self.voltammetryEndCallback and callable(self.voltammetryEndCallback):
+			self.voltammetryEndCallback()

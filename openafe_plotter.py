@@ -55,6 +55,32 @@ def plotPoints(queVoltage, queCurrent):
 	plt.draw()
 	plt.pause(0.05)
 
+# ***** ***** ***** Callbacks ***** ***** *****
+def onVoltammetryPoint(voltage, current):
+	"""
+	The function `onVoltammetryPoint` appends voltage and current values to two queues and plots the
+	points every 20 data points.
+	
+	:param voltage: The voltage value at a specific point in the voltammetry experiment
+	:param current: The current parameter represents the current value measured during a voltammetry
+	experiment
+	"""
+	queVoltage.append(voltage)
+	queCurrent.append(current)
+
+	if len(queVoltage) % 20 == 0: 
+		plotPoints(queVoltage, queCurrent)
+
+
+def onVoltammetryEnd():
+	"""
+	The function `onVoltammetryEnd` plots the voltage and current points and displays a message indicating
+	that the voltammetry is finished.
+	"""
+	plotPoints(queVoltage, queCurrent)
+	print("INFO: Voltammetry finished!") 
+	plt.show()
+
 
 # ***** ***** ***** MAIN ***** ***** *****:
 
@@ -62,7 +88,7 @@ def plotPoints(queVoltage, queCurrent):
 queVoltage = deque(maxlen = 2000)
 queCurrent = deque(maxlen = 2000)
 
-openAFE_device = OpenAFE(COM_PORT)
+openAFE_device = OpenAFE(COM_PORT, onVoltammetryPoint, onVoltammetryEnd)
 
 while True:
 	messageReceived = openAFE_device.getMessageFromOpenAFE()
@@ -80,30 +106,6 @@ while True:
 			print("*** ERROR: MCU declined command")
 			break
 		
-		while True:
-			messageReceived = openAFE_device.getMessageFromOpenAFE()
-			point = messageReceived[4:] 
-			# print(messageReceived[4:]) # De-comment to print the voltammetry points
-			
-			if messageReceived == "MSG,END":
-				plotPoints(queVoltage, queCurrent)
-				print("INFO: Voltammetry finished!") 
-				plt.show()
-				break
-			
-			if messageReceived[:-4] == "ERR":
-				print("*** ERROR: An error ocurred")
-				break
+		openAFE_device.receiveVoltammetryPoints()
 
-			elif messageReceived != -1: # if message is valid
-				pointObjs = point.split(',')
-
-				voltage = float(pointObjs[0])
-				current = float(pointObjs[1])
-
-				queVoltage.append(voltage)
-				queCurrent.append(current)
-
-				if len(queVoltage) % 20 == 0: 
-					plotPoints(queVoltage, queCurrent)
 		break
