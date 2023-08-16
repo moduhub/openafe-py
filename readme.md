@@ -29,6 +29,10 @@ pip install matplotlib
 ```py
 # Adjust the parameters below according to your needs:
 # Comment or de-comment the voltammetry type as needed.
+
+# COM port:
+COM_PORT = "COM6" # The COM port to which the Arduino is connected
+
 # Parameters:
 voltammetryType = "CV" # Cyclic Voltammetry
 # voltammetryType = "DPV" # Differential Pulse Voltammetry
