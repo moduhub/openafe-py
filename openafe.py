@@ -31,6 +31,40 @@ class OpenAFE:
 			return -1
 
 
+	def isValidMessage(self, message):
+		"""
+		NOTE: This functions does not check if the message is an error message, it checks if the message 
+		received is valid, in other words, if it was not corrupted during its transmission.
+
+		The function `isValidMessage` checks if a given message is valid by comparing it to -1.
+		
+		:param message: The parameter "message" is a variable that represents the message being checked for
+		validity
+		:return: True if the message is equal to -1, and False otherwise.
+		"""
+		if message == -1:
+			return True
+		else:
+			return False
+
+
+	def isErrorMessage(self, message):
+		"""
+		NOTE: This function only checks if the message is an error message, but not if the message received
+		is valid. Invalid messages have a value of -1. 
+
+		The function checks if a given message is an error message by checking if it begins with "ERR".
+		
+		:param message: The parameter "message" is a string that represents a message
+		:return: a boolean value. If the message begins with "ERR", it will return True. Otherwise, it will
+		return False.
+		"""
+		if message[:-4] == "ERR":
+			return True
+		else:
+			return False
+
+
 	def _calculateChecksumOfString(self, string):
 		"""
 		NOTE: PRIVATE METHOD, DO NOT CALL IT!

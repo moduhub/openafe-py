@@ -93,7 +93,7 @@ openAFE_device = OpenAFE(COM_PORT, onVoltammetryPoint, onVoltammetryEnd)
 while True:
 	messageReceived = openAFE_device.waitForMessage()
 
-	if messageReceived == -1:
+	if openAFE_device.isValidMessage(messageReceived):
 		print("*** ERROR: Message corrupted!")
 		break
 
@@ -102,7 +102,8 @@ while True:
 			scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles, settlingTime_milliseconds)
 
 		messageReceived = openAFE_device.waitForMessage() 
-		if messageReceived[:-4] == "ERR":
+
+		if openAFE_device.isErrorMessage(messageReceived):
 			print("*** ERROR: MCU declined command")
 			break
 		
