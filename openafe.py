@@ -2,10 +2,10 @@ import serial
 
 class OpenAFE:
 
-	def __init__(self, comPort, voltammetryPointCallback=None, voltammetryEndCallback=None):
+	def __init__(self, comPort, onPointCallback=None, onEndCallback=None):
 		self.ser = serial.Serial(comPort, 115200)
-		self.voltammetryPointCallback = voltammetryPointCallback
-		self.voltammetryEndCallback = voltammetryEndCallback
+		self.onPointCallback = onPointCallback
+		self.onEndCallback = onEndCallback
 
 
 	def waitForMessage(self):
@@ -68,7 +68,7 @@ class OpenAFE:
 	def _calculateChecksumOfString(self, string):
 		"""
 		NOTE: PRIVATE METHOD, DO NOT CALL IT!
-		
+
 		The function `calculateChecksumOfString` calculates the checksum of a given string by performing a
 		bitwise XOR operation on the ASCII values of its characters.
 		
@@ -181,16 +181,16 @@ class OpenAFE:
 		:param current: The current parameter represents the measured electric current in the voltammetry
 		experiment
 		"""
-		if self.voltammetryPointCallback and callable(self.voltammetryPointCallback):
-			self.voltammetryPointCallback(voltage, current)
+		if self.onPointCallback and callable(self.onPointCallback):
+			self.onPointCallback(voltage, current)
 
 
 	def _onVoltammetryEnd(self):
 		"""
 		NOTE: PRIVATE METHOD, DO NOT CALL IT!
 
-		The function `_onVoltammetryEnd` checks if a callback function `voltammetryEndCallback` is defined and
+		The function `_onVoltammetryEnd` checks if a callback function `onEndCallback` is defined and
 		callable, and if so, it calls the callback function.
 		"""
-		if self.voltammetryEndCallback and callable(self.voltammetryEndCallback):
-			self.voltammetryEndCallback()
+		if self.onEndCallback and callable(self.onEndCallback):
+			self.onEndCallback()
