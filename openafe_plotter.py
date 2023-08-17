@@ -91,7 +91,7 @@ queCurrent = deque(maxlen = 2000)
 openAFE_device = OpenAFE(COM_PORT, onVoltammetryPoint, onVoltammetryEnd)
 
 while True:
-	messageReceived = openAFE_device.getMessageFromOpenAFE()
+	messageReceived = openAFE_device.waitForMessage()
 
 	if messageReceived == -1:
 		print("*** ERROR: Message corrupted!")
@@ -101,7 +101,7 @@ while True:
 		openAFE_device.makeCyclicVoltammetry(endingPotential_millivolts,startingPotential_millivolts, \
 			scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles, settlingTime_milliseconds)
 
-		messageReceived = openAFE_device.getMessageFromOpenAFE() 
+		messageReceived = openAFE_device.waitForMessage() 
 		if messageReceived[:-4] == "ERR":
 			print("*** ERROR: MCU declined command")
 			break

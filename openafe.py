@@ -8,9 +8,9 @@ class OpenAFE:
 		self.voltammetryEndCallback = voltammetryEndCallback
 
 
-	def getMessageFromOpenAFE(self):
+	def waitForMessage(self):
 		"""
-		The function `getMessageFromOpenAFE` reads a message from a serial port, checks its checksum, and
+		The function `waitForMessage` awaits for and reads a message from a serial port, checks its checksum, and
 		returns the message if the checksum is valid, otherwise it returns -1.
 		:return: either the message received from OpenAFE if the checksum is valid, or -1 if the checksum is
 		not valid.
@@ -31,8 +31,10 @@ class OpenAFE:
 			return -1
 
 
-	def calculateChecksumOfString(self, string):
+	def _calculateChecksumOfString(self, string):
 		"""
+		NOTE: PRIVATE METHOD, DO NOT CALL IT!
+		
 		The function `calculateChecksumOfString` calculates the checksum of a given string by performing a
 		bitwise XOR operation on the ASCII values of its characters.
 		
@@ -46,8 +48,10 @@ class OpenAFE:
 		return checksum
 
 
-	def getChecksumIntegerFromString(self, checksumString):
+	def _getChecksumIntegerFromString(self, checksumString):
 		"""
+		NOTE: PRIVATE METHOD, DO NOT CALL IT!
+
 		The function `getChecksumIntegerFromString` converts a string representation of a checksum into an
 		integer value.
 		
