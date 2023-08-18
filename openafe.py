@@ -19,8 +19,8 @@ class OpenAFE:
 		rawMessage = messageReceived[2:][:-5]
 		
 		# check the message's checksum ...
-		calculatedChecksum = self.calculateChecksumOfString(messageReceived[3:][:-8])
-		checksumInMessage = self.getChecksumIntegerFromString(rawMessage[-2:])
+		calculatedChecksum = self._calculateChecksumOfString(messageReceived[3:][:-8])
+		checksumInMessage = self._getChecksumIntegerFromString(rawMessage[-2:])
 
 		if (calculatedChecksum - checksumInMessage) == 0:
 			# checksum is valid
@@ -69,7 +69,7 @@ class OpenAFE:
 		"""
 		NOTE: PRIVATE METHOD, DO NOT CALL IT!
 
-		The function `calculateChecksumOfString` calculates the checksum of a given string by performing a
+		The function `_calculateChecksumOfString` calculates the checksum of a given string by performing a
 		bitwise XOR operation on the ASCII values of its characters.
 		
 		:param string: The parameter "string" is a string of characters for which we want to calculate the
@@ -86,7 +86,7 @@ class OpenAFE:
 		"""
 		NOTE: PRIVATE METHOD, DO NOT CALL IT!
 
-		The function `getChecksumIntegerFromString` converts a string representation of a checksum into an
+		The function `_getChecksumIntegerFromString` converts a string representation of a checksum into an
 		integer value.
 		
 		:param checksumString: The `checksumString` parameter is a string that represents a checksum, e.g.: "32".
@@ -113,7 +113,7 @@ class OpenAFE:
 		:param command: The `command` parameter is a string that represents the command to be sent to the
 		MCU (Microcontroller Unit), e.g.: "CVW,500,-500,250,2,1".
 		"""
-		checksumString = hex(self.calculateChecksumOfString(command))
+		checksumString = hex(self._calculateChecksumOfString(command))
 		checksumString = checksumString[2:] # removes the "0x"
 		fullCommand = "$" + command + "*" + checksumString
 		self.ser.write(fullCommand.encode("utf-8"))
@@ -150,7 +150,7 @@ class OpenAFE:
 		points, and calls the appropriate callbacks.
 		"""
 		while True:
-			messageReceived = self.getMessageFromOpenAFE()
+			messageReceived = self.waitForMessage()
 			point = messageReceived[4:]
 
 			if messageReceived == "MSG,END":
