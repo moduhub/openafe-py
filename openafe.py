@@ -113,8 +113,8 @@ class OpenAFE:
 		:param command: The `command` parameter is a string that represents the command to be sent to the
 		MCU (Microcontroller Unit), e.g.: "CVW,500,-500,250,2,1".
 		"""
-		checksumString = hex(self._calculateChecksumOfString(command))
-		checksumString = checksumString[2:] # removes the "0x"
+		checksum = self._calculateChecksumOfString(command)
+		checksumString = format(checksum, '02X')
 		fullCommand = "$" + command + "*" + checksumString
 		self.ser.write(fullCommand.encode("utf-8"))
 
