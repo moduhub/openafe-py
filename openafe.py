@@ -1,21 +1,45 @@
 import serial
+import sys
 
 class OpenAFE:
 
 	def __init__(self, comPort, onPointCallback=None, onEndCallback=None):
-		self.ser = serial.Serial(comPort, 115200)
+		"""
+		The above code defines a Python class with an initialization method that establishes a serial
+		connection and sets optional callback functions.
+		
+		:param comPort: The comPort parameter is the serial port to which the OpenAFE device is connected.
+		It is used to establish a connection with the device
+		:param onPointCallback: The onPointCallback parameter is a function that will be called whenever a
+		data point is received from the OpenAFE device. This function can be used to process or display the
+		received data point
+		:param onEndCallback: The `onEndCallback` parameter is a callback function that will be called when
+		the communication with the OpenAFE device ends. It is an optional parameter, so if you don't provide
+		a callback function, it will default to `None`
+		"""
+		try:
+			self.ser = serial.Serial(comPort, 115200)
+		except serial.serialutil.SerialException as e:
+			print("*** ERROR: failed to stablish connection with the OpenAFE device. CHECK IF IT IS CONNECTED")
+			sys.exit(1)
+
 		self.onPointCallback = onPointCallback
 		self.onEndCallback = onEndCallback
 
 
 	def waitForMessage(self):
 		"""
-		The function `waitForMessage` awaits for and reads a message from a serial port, checks its checksum, and
-		returns the message if the checksum is valid, otherwise it returns -1.
-		:return: either the message received from OpenAFE if the checksum is valid, or -1 if the checksum is
-		not valid.
+		The `waitForMessage` function reads a message from a serial port, checks its checksum, and returns
+		the message if the checksum is valid, otherwise it returns -1.
+		:return: The function `waitForMessage` returns either the message received from OpenAFE if the
+		checksum is valid, or -1 if the checksum is not valid.
 		"""
-		messageReceived=str(self.ser.readline())
+		try:
+			messageReceived=str(self.ser.readline())
+		except serial.serialutil.SerialException as e:
+			print("*** ERROR: failed to read from the OpenAFE device. CHECK IF IT IS CONNECTED")
+			sys.exit(1)
+
 		rawMessage = messageReceived[2:][:-5]
 		
 		# check the message's checksum ...
@@ -107,15 +131,22 @@ class OpenAFE:
 
 	def sendCommandToMCU(self, command):
 		"""
-		The function `sendCommandToMCU` sends a command to a microcontroller unit (MCU) by calculating a
+		The `sendCommandToMCU` function sends a command to a microcontroller unit (MCU) by calculating a
 		checksum, constructing a full command string, and writing it to a serial port.
 		
 		:param command: The `command` parameter is a string that represents the command to be sent to the
-		MCU (Microcontroller Unit), e.g.: "CVW,500,-500,250,2,1".
+		MCU (Microcontroller Unit). It can be any valid command that the MCU understands. For example,
+		"CVW,500,-500,250,2,1" is a command that instructs the MCU to
 		"""
-		checksum = self._calculateChecksumOfString(command)
+		try:
+			checksum = self._calculateChecksumOfString(command)
+		except serial.serialutil.SerialException as e:
+			print("*** ERROR: failed to send command to the OpenAFE device. CHECK IF IT IS CONNECTED")
+			sys.exit(1)
+
 		checksumString = format(checksum, '02X')
 		fullCommand = "$" + command + "*" + checksumString
+		# print("full command: ", fullCommand)
 		self.ser.write(fullCommand.encode("utf-8"))
 
 
