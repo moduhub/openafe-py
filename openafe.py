@@ -140,14 +140,14 @@ class OpenAFE:
 		"""
 		try:
 			checksum = self._calculateChecksumOfString(command)
+			checksumString = format(checksum, '02X')
+			fullCommand = "$" + command + "*" + checksumString
+			# print("full command: ", fullCommand)
+			self.ser.write(fullCommand.encode("utf-8"))
+
 		except serial.serialutil.SerialException as e:
 			print("*** ERROR: failed to send command to the OpenAFE device. CHECK IF IT IS CONNECTED")
 			sys.exit(1)
-
-		checksumString = format(checksum, '02X')
-		fullCommand = "$" + command + "*" + checksumString
-		# print("full command: ", fullCommand)
-		self.ser.write(fullCommand.encode("utf-8"))
 
 
 	def setCurrentRange(self, currentRange):
