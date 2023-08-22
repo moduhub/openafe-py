@@ -150,6 +150,24 @@ class OpenAFE:
 		self.ser.write(fullCommand.encode("utf-8"))
 
 
+	def setCurrentRange(self, currentRange):
+		"""
+		The function sets the current range of an OpenAFE device and returns True if successful, or False if
+		there was an error.
+		
+		:param currentRange: The currentRange parameter is the desired range of current that the OpenAFE
+		device should use. It is a numerical value that represents the range in amperes
+		:return: a boolean value. If the current range was set successfully, it returns True. If there was
+		an error and the current range was not set, it returns False.
+		"""
+		self.sendCommandToMCU("CMD,CUR," + str(currentRange))
+		if self.isErrorMessage(self.waitForMessage()):
+			print("*** ERROR: Current range was not set. OBS: OpenAFE device will be using the default current range.")
+			return False
+		else:
+			return True
+
+
 	def makeCyclicVoltammetry(self, endingPotential, startingPotential, scanRate, stepSize, numberOfCycles, settlingTime):
 		"""
 		The function "makeCyclicVoltammetry" sends a command string to a microcontroller unit (MCU) to
