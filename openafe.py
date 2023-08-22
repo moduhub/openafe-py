@@ -1,10 +1,11 @@
 import serial
-import sys
 
 class OpenAFE:
 
 	def __init__(self, comPort, onPointCallback=None, onEndCallback=None):
 		"""
+		NOTE: This method can raise an Exception.
+
 		The above code defines a Python class with an initialization method that establishes a serial
 		connection and sets optional callback functions.
 		
@@ -18,17 +19,25 @@ class OpenAFE:
 		a callback function, it will default to `None`
 		"""
 		try:
+			self.onPointCallback = onPointCallback
+			self.onEndCallback = onEndCallback
+			
 			self.ser = serial.Serial(comPort, 115200)
+
+			messageReceived = self.waitForMessage()
+
+			if messageReceived != "MSG,RDY" or self.isValidMessage(messageReceived):
+				raise Exception("OpenAFE is not ready!")
+
 		except serial.serialutil.SerialException as e:
-			print("*** ERROR: failed to stablish connection with the OpenAFE device. CHECK IF IT IS CONNECTED")
-			sys.exit(1)
-
-		self.onPointCallback = onPointCallback
-		self.onEndCallback = onEndCallback
-
+			raise Exception("Failed to stablish connection with the OpenAFE device. CHECK IF IT IS CONNECTED!")
+		except Exception as e:
+			raise Exception("Could not initiate communication with the OpenAFE device. Reason: ", e)
 
 	def waitForMessage(self):
 		"""
+		NOTE: This method can raise an Exception.
+
 		The `waitForMessage` function reads a message from a serial port, checks its checksum, and returns
 		the message if the checksum is valid, otherwise it returns -1.
 		:return: The function `waitForMessage` returns either the message received from OpenAFE if the
@@ -37,8 +46,7 @@ class OpenAFE:
 		try:
 			messageReceived=str(self.ser.readline())
 		except serial.serialutil.SerialException as e:
-			print("*** ERROR: failed to read from the OpenAFE device. CHECK IF IT IS CONNECTED")
-			sys.exit(1)
+			raise Exception("Failed to read from the OpenAFE device. CHECK IF IT IS CONNECTED!")
 
 		rawMessage = messageReceived[2:][:-5]
 		
@@ -131,6 +139,8 @@ class OpenAFE:
 
 	def sendCommandToMCU(self, command):
 		"""
+		NOTE: This method can raise an Exception.
+
 		The `sendCommandToMCU` function sends a command to a microcontroller unit (MCU) by calculating a
 		checksum, constructing a full command string, and writing it to a serial port.
 		
@@ -145,13 +155,14 @@ class OpenAFE:
 			# print("full command: ", fullCommand)
 			self.ser.write(fullCommand.encode("utf-8"))
 
-		except serial.serialutil.SerialException as e:
-			print("*** ERROR: failed to send command to the OpenAFE device. CHECK IF IT IS CONNECTED")
-			sys.exit(1)
+		except serial.serialutil.SerialException:
+			raise Exception("Failed send command to the OpenAFE device. CHECK IF IT IS CONNECTED!")
 
 
 	def setCurrentRange(self, currentRange):
 		"""
+		NOTE: This method can raise an Exception.
+
 		The function sets the current range of an OpenAFE device and returns True if successful, or False if
 		there was an error.
 		
@@ -160,16 +171,19 @@ class OpenAFE:
 		:return: a boolean value. If the current range was set successfully, it returns True. If there was
 		an error and the current range was not set, it returns False.
 		"""
-		self.sendCommandToMCU("CMD,CUR," + str(currentRange))
-		if self.isErrorMessage(self.waitForMessage()):
-			print("*** ERROR: Current range was not set. OBS: OpenAFE device will be using the default current range.")
-			return False
-		else:
-			return True
+		try:
+			self.sendCommandToMCU("CMD,CUR," + str(currentRange))
+			if self.isErrorMessage(self.waitForMessage()):
+				raise Exception("Command was rejected by the OpenAFE device.")
+		except Exception as e:
+			raise Exception("Could not chanhge the current range setting in the OpenAFE device. Reason: ", e)
+
 
 
 	def makeCyclicVoltammetry(self, endingPotential, startingPotential, scanRate, stepSize, numberOfCycles, settlingTime):
 		"""
+		NOTE: This method can raise an Exception.
+
 		The function "makeCyclicVoltammetry" sends a command string to a microcontroller unit (MCU) to
 		perform cyclic voltammetry with specified parameters.
 		
@@ -190,7 +204,10 @@ class OpenAFE:
 		"""
 		CVCommandString = "CVW," + str(endingPotential) + "," + str(startingPotential) + \
 		"," + str(scanRate) + "," + str(stepSize) + "," + str(numberOfCycles)
-		self.sendCommandToMCU(CVCommandString) # send the CV command
+		try:
+			self.sendCommandToMCU(CVCommandString) # send the CV command
+		except Exception as e:
+			raise Exception("Could not send the Cyclic Voltammetry to the OpenAFE device. Reason: ", e)
 
 
 	def receiveVoltammetryPoints(self):

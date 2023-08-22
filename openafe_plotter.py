@@ -90,28 +90,20 @@ def onVoltammetryEnd():
 queVoltage = deque(maxlen = 2000)
 queCurrent = deque(maxlen = 2000)
 
-openAFE_device = OpenAFE(COM_PORT, onVoltammetryPoint, onVoltammetryEnd)
+try:
+	openAFE_device = OpenAFE(COM_PORT, onVoltammetryPoint, onVoltammetryEnd)
 
-while True:
-	messageReceived = openAFE_device.waitForMessage()
+	openAFE_device.setCurrentRange(currentRange_microamps)
 
-	if openAFE_device.isValidMessage(messageReceived):
-		print("*** ERROR: Message corrupted!")
-		break
+	openAFE_device.makeCyclicVoltammetry(endingPotential_millivolts,startingPotential_millivolts, \
+		scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles, settlingTime_milliseconds)
 
-	elif messageReceived == "MSG,RDY":
+	messageReceived = openAFE_device.waitForMessage() 
 
-		openAFE_device.setCurrentRange(currentRange_microamps)
+	if openAFE_device.isErrorMessage(messageReceived):
+		raise Exception("*** ERROR: MCU declined CV command")
+	
+	openAFE_device.receiveVoltammetryPoints()
 
-		openAFE_device.makeCyclicVoltammetry(endingPotential_millivolts,startingPotential_millivolts, \
-			scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles, settlingTime_milliseconds)
-
-		messageReceived = openAFE_device.waitForMessage() 
-
-		if openAFE_device.isErrorMessage(messageReceived):
-			print("*** ERROR: MCU declined command")
-			break
-		
-		openAFE_device.receiveVoltammetryPoints()
-
-		break
+except Exception as exception:
+	print(exception)
