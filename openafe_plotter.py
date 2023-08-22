@@ -19,6 +19,8 @@ stepSize_millivolts = 2
 numberOfCycles = 1
 settlingTime_milliseconds = 0 # (NOT YET IMPLETMENTED)
 
+currentRange_microamps = 50	
+
 # Graph Options:
 graphTitle = "H2O + NaCl Cyclic Voltammetry" # the graph title to be displayed, can be left in blank
 graphSubTitle = "" # the graph sub title, can be left blank
@@ -98,6 +100,9 @@ while True:
 		break
 
 	elif messageReceived == "MSG,RDY":
+
+		openAFE_device.setCurrentRange(currentRange_microamps)
+
 		openAFE_device.makeCyclicVoltammetry(endingPotential_millivolts,startingPotential_millivolts, \
 			scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles, settlingTime_milliseconds)
 
