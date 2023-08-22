@@ -186,13 +186,16 @@ class OpenAFE:
 
 
 
-	def makeCyclicVoltammetry(self, endingPotential, startingPotential, scanRate, stepSize, numberOfCycles, settlingTime):
+	def makeCyclicVoltammetry(self, settlingTime, startingPotential, endingPotential, scanRate, stepSize, numberOfCycles):
 		"""
 		NOTE: This method can raise an Exception.
 
 		The function "makeCyclicVoltammetry" sends a command string to a microcontroller unit (MCU) to
 		perform cyclic voltammetry with specified parameters.
 		
+		:param settlingTime: The settlingTime parameter refers to the time in seconds that the system should
+		wait before starting the cyclic voltammetry measurement. This allows the system to stabilize and
+		reach a steady state before the measurement begins, in milliseconds (ms)
 		:param endingPotential: The ending potential is the final voltage value at which the cyclic
 		voltammetry will stop. It is a floating-point number representing the voltage in volts, in millivolts (mV)
 		:param startingPotential: The starting potential is the initial voltage at which the cyclic
@@ -204,11 +207,8 @@ class OpenAFE:
 		positive or negative, in millivolts (mV)
 		:param numberOfCycles: The numberOfCycles parameter specifies the number of cycles to perform in the
 		cyclic voltammetry experiment
-		:param settlingTime: The settlingTime parameter refers to the time in seconds that the system should
-		wait before starting the cyclic voltammetry measurement. This allows the system to stabilize and
-		reach a steady state before the measurement begins, in milliseconds (ms)
 		"""
-		CVCommandString = "CVW," + str(endingPotential) + "," + str(startingPotential) + \
+		CVCommandString = "CVW," + str(settlingTime) + "," + str(startingPotential) + "," + str(endingPotential) + \
 		"," + str(scanRate) + "," + str(stepSize) + "," + str(numberOfCycles)
 		try:
 			self.sendCommandToMCU(CVCommandString) # send the CV command

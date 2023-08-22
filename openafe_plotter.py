@@ -17,7 +17,7 @@ endingPotential_millivolts = 500
 scanRate_millivoltsPerSecond = 250
 stepSize_millivolts = 2
 numberOfCycles = 1
-settlingTime_milliseconds = 0 # (NOT YET IMPLETMENTED)
+settlingTime_milliseconds = 2000
 
 currentRange_microamps = 50	
 
@@ -95,8 +95,8 @@ try:
 
 	openAFE_device.setCurrentRange(currentRange_microamps)
 
-	openAFE_device.makeCyclicVoltammetry(endingPotential_millivolts,startingPotential_millivolts, \
-		scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles, settlingTime_milliseconds)
+	openAFE_device.makeCyclicVoltammetry(settlingTime_milliseconds, startingPotential_millivolts, endingPotential_millivolts, \
+		scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles)
 	
 	openAFE_device.receiveVoltammetryPoints()
 
