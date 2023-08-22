@@ -97,11 +97,6 @@ try:
 
 	openAFE_device.makeCyclicVoltammetry(endingPotential_millivolts,startingPotential_millivolts, \
 		scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles, settlingTime_milliseconds)
-
-	messageReceived = openAFE_device.waitForMessage() 
-
-	if openAFE_device.isErrorMessage(messageReceived):
-		raise Exception("*** ERROR: MCU declined CV command")
 	
 	openAFE_device.receiveVoltammetryPoints()
 

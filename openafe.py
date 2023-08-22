@@ -29,10 +29,11 @@ class OpenAFE:
 			if messageReceived != "MSG,RDY" or self.isValidMessage(messageReceived):
 				raise Exception("OpenAFE is not ready!")
 
-		except serial.serialutil.SerialException as e:
+		except serial.serialutil.SerialException:
 			raise Exception("Failed to stablish connection with the OpenAFE device. CHECK IF IT IS CONNECTED!")
 		except Exception as e:
 			raise Exception("Could not initiate communication with the OpenAFE device. Reason: ", e)
+
 
 	def waitForMessage(self):
 		"""
@@ -45,7 +46,7 @@ class OpenAFE:
 		"""
 		try:
 			messageReceived=str(self.ser.readline())
-		except serial.serialutil.SerialException as e:
+		except serial.serialutil.SerialException:
 			raise Exception("Failed to read from the OpenAFE device. CHECK IF IT IS CONNECTED!")
 
 		rawMessage = messageReceived[2:][:-5]
@@ -60,7 +61,7 @@ class OpenAFE:
 			return message
 		else :
 			# checksum is not valid
-			return -1
+			raise Exception("Message from the MCU got corrupted.")
 
 
 	def isValidMessage(self, message):
@@ -155,8 +156,15 @@ class OpenAFE:
 			# print("full command: ", fullCommand)
 			self.ser.write(fullCommand.encode("utf-8"))
 
+			commandResponse = self.waitForMessage()
+
+			if self.isErrorMessage(commandResponse):
+				raise Exception("MCU declined CV command")
+
 		except serial.serialutil.SerialException:
 			raise Exception("Failed send command to the OpenAFE device. CHECK IF IT IS CONNECTED!")
+		except Exception as e:
+			raise("Failed send command to the OpenAFE device. Reason: ", e)
 
 
 	def setCurrentRange(self, currentRange):
@@ -173,8 +181,6 @@ class OpenAFE:
 		"""
 		try:
 			self.sendCommandToMCU("CMD,CUR," + str(currentRange))
-			if self.isErrorMessage(self.waitForMessage()):
-				raise Exception("Command was rejected by the OpenAFE device.")
 		except Exception as e:
 			raise Exception("Could not chanhge the current range setting in the OpenAFE device. Reason: ", e)
 
@@ -224,8 +230,7 @@ class OpenAFE:
 				break
 			
 			if messageReceived[:-4] == "ERR":
-				print("*** ERROR: An error ocurred")
-				break
+				raise Exception("An error ocurred during the voltammetry.")
 
 			elif messageReceived != -1: # if message is valid
 				pointObjs = point.split(',')
