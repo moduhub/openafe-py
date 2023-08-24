@@ -9,17 +9,23 @@
 COM_PORT = "COM6" # The COM port to which the Arduino is connected
 
 # Parameters:
-voltammetryType = "CV" # Cyclic Voltammetry
-# voltammetryType = "DPV" # Differential Pulse Voltammetry (NOT YET IMPLEMENTED)
+# voltammetryType = "CV" # Cyclic Voltammetry
+voltammetryType = "DPV" # Differential Pulse Voltammetry (NOT YET IMPLEMENTED)
 # voltammetryType = "SW" # Square Wave (NOT YET IMPLEMENTED)
-startingPotential_millivolts = -500
+startingPotential_millivolts = 0
 endingPotential_millivolts = 500
 scanRate_millivoltsPerSecond = 250
 stepSize_millivolts = 2
 numberOfCycles = 1
-settlingTime_milliseconds = 2000
+settlingTime_milliseconds = 1000
 
-currentRange_microamps = 50	
+pulsePotential_millivolts = 100
+pulseWidth_milliseconds = 2
+baseWidth_milliseconds = 20
+samplePeriodPulse_milliseconds = 1
+samplePeriodBase_milliseconds = 2
+
+currentRange_microamps = 200	
 
 # Graph Options:
 graphTitle = "H2O + NaCl Cyclic Voltammetry" # the graph title to be displayed, can be left in blank
@@ -95,9 +101,19 @@ try:
 
 	openAFE_device.setCurrentRange(currentRange_microamps)
 
-	openAFE_device.makeCyclicVoltammetry(settlingTime_milliseconds, startingPotential_millivolts, endingPotential_millivolts, \
-		scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles)
-	
+	if voltammetryType == "CV":
+		openAFE_device.makeCyclicVoltammetry(settlingTime_milliseconds, startingPotential_millivolts, endingPotential_millivolts, \
+			scanRate_millivoltsPerSecond, stepSize_millivolts, numberOfCycles)
+
+	elif voltammetryType == "DPV":
+		openAFE_device.makeDifferentialPulseVoltammetry(settlingTime_milliseconds, startingPotential_millivolts, 
+							endingPotential_millivolts, pulsePotential_millivolts, stepSize_millivolts,
+							pulseWidth_milliseconds, baseWidth_milliseconds, samplePeriodPulse_milliseconds, 
+							samplePeriodBase_milliseconds)
+
+	elif voltammetryType == "SW":
+		raise Exception("SWV not yet implemented, choose DPV or CV.")
+
 	openAFE_device.receiveVoltammetryPoints()
 
 except Exception as exception:

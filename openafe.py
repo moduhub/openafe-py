@@ -218,6 +218,44 @@ class OpenAFE:
 			raise Exception("Could not send the Cyclic Voltammetry to the OpenAFE device. Reason: ", e)
 
 
+	def makeDifferentialPulseVoltammetry(self, settlingTime, startingPotential, endingPotential, pulsePotential, 
+				      stepPotential, pulseWidth, baseWidth, samplePeriodPulse, samplePeriodBase):
+		"""
+		The function `makeDifferentialPulseVoltammetry` sends a command string to an OpenAFE device to
+		perform a Differential Pulse Voltammetry measurement.
+		
+		:param settlingTime: The settling time is the duration in seconds for the system to stabilize before
+		starting the measurement. It allows any transient effects to settle down and ensures accurate
+		measurements
+		:param startingPotential: The starting potential is the initial voltage at which the experiment
+		begins. It is the potential at the beginning of the scan range
+		:param endingPotential: The endingPotential parameter is the final potential value at which the
+		differential pulse voltammetry will stop
+		:param pulsePotential: The pulsePotential parameter refers to the potential at which the pulse is
+		applied during the Differential Pulse Voltammetry (DPV) experiment
+		:param stepPotential: The stepPotential parameter refers to the potential difference between each
+		step in the voltage scan during the Differential Pulse Voltammetry (DPV) experiment. It determines
+		the size of the voltage steps that the system will take during the scan
+		:param pulseWidth: The pulseWidth parameter refers to the duration of the voltage pulse applied
+		during the differential pulse voltammetry experiment. It is the time interval for which the
+		potential is held at the pulsePotential value
+		:param baseWidth: The baseWidth parameter refers to the width of the base potential in the
+		Differential Pulse Voltammetry (DPV) technique. It represents the duration of the potential applied
+		during the baseline period before the pulse potential is applied
+		:param samplePeriodPulse: The samplePeriodPulse parameter refers to the time interval between each
+		sample taken during the pulse phase of the Differential Pulse Voltammetry (DPV) experiment
+		:param samplePeriodBase: The samplePeriodBase parameter refers to the time interval between each
+		data point during the base phase of the differential pulse voltammetry experiment
+		"""
+		DPVCommandString = "DPV," + str(settlingTime) + "," + str(startingPotential) + "," + \
+			str(endingPotential) + "," + str(pulsePotential) + "," + str(stepPotential) + "," + \
+			str(pulseWidth) + "," + str(baseWidth) + "," + str(samplePeriodPulse) + "," + str(samplePeriodBase)
+		try:
+			self.sendCommandToMCU(DPVCommandString)
+		except Exception as e:
+			raise Exception("Could not send the Differential Pulse Voltammetry to the OpenAFE device. Reason: ", e)
+
+
 	def receiveVoltammetryPoints(self):
 		"""
 		The function `receiveVoltammetryPoints` receives messages from OpenAFE, processes the received
