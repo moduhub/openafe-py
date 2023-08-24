@@ -45,19 +45,21 @@ class OpenAFE:
 		checksum is valid, or -1 if the checksum is not valid.
 		"""
 		try:
-			messageReceived=str(self.ser.readline())
+			rawMessage=str(self.ser.readline())
 		except serial.serialutil.SerialException:
 			raise Exception("Failed to read from the OpenAFE device. CHECK IF IT IS CONNECTED!")
 
-		rawMessage = messageReceived[2:][:-5]
-		
+		messageReceived = rawMessage[2:][:-3]
+
+		checksum = messageReceived[-2:]
+
 		# check the message's checksum ...
-		calculatedChecksum = self._calculateChecksumOfString(messageReceived[3:][:-8])
-		checksumInMessage = self._getChecksumIntegerFromString(rawMessage[-2:])
+		calculatedChecksum = self._calculateChecksumOfString(messageReceived[1:][:-3])
+		checksumInMessage = self._getChecksumIntegerFromString(checksum)
 
 		if (calculatedChecksum - checksumInMessage) == 0:
 			# checksum is valid
-			message = messageReceived[3:][:-8] 
+			message = messageReceived[1:][:-3] 
 			return message
 		else :
 			# checksum is not valid
