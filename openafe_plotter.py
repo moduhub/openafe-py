@@ -10,13 +10,14 @@ COM_PORT = "COM6" # The COM port to which the Arduino is connected
 
 # Parameters:
 # voltammetryType = "CV" # Cyclic Voltammetry
-voltammetryType = "DPV" # Differential Pulse Voltammetry (NOT YET IMPLEMENTED)
-# voltammetryType = "SW" # Square Wave (NOT YET IMPLEMENTED)
-startingPotential_millivolts = 0
+# voltammetryType = "DPV" # Differential Pulse Voltammetry
+voltammetryType = "SW" # Square Wave
+
+startingPotential_millivolts = -500
 endingPotential_millivolts = 500
-scanRate_millivoltsPerSecond = 250
+scanRate_millivoltsPerSecond = 200
 stepSize_millivolts = 2
-numberOfCycles = 1
+numberOfCycles = 3
 settlingTime_milliseconds = 1000
 
 pulsePotential_millivolts = 100
@@ -24,6 +25,8 @@ pulseWidth_milliseconds = 2
 baseWidth_milliseconds = 20
 samplePeriodPulse_milliseconds = 1
 samplePeriodBase_milliseconds = 2
+
+pulseFrequency_hertz = 10
 
 currentRange_microamps = 200	
 
@@ -112,7 +115,9 @@ try:
 							samplePeriodBase_milliseconds)
 
 	elif voltammetryType == "SW":
-		raise Exception("SWV not yet implemented, choose DPV or CV.")
+		openAFE_device.makeSquareWaveVoltammetry(settlingTime_milliseconds, startingPotential_millivolts, 
+										   endingPotential_millivolts, scanRate_millivoltsPerSecond, 
+										   pulsePotential_millivolts, pulseFrequency_hertz, samplePeriodPulse_milliseconds)
 
 	openAFE_device.receiveVoltammetryPoints()
 

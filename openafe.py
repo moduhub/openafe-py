@@ -256,6 +256,37 @@ class OpenAFE:
 			raise Exception("Could not send the Differential Pulse Voltammetry to the OpenAFE device. Reason: ", e)
 
 
+	def makeSquareWaveVoltammetry(self, settlingTime, startingPotential, endingPotential, scanRate, pulsePotential, 
+							   pulseFrequency, samplePeriodPulse):
+		"""
+		The function `makeSquareWaveVoltammetry` sends a command string to an OpenAFE device to perform
+		Square Wave Voltammetry with specified parameters.
+		
+		:param settlingTime: The settling time is the duration in seconds for the system to stabilize before
+		starting the measurement, in milliseconds
+		:param startingPotential: The startingPotential parameter represents the initial potential at the
+		beginning of the square wave voltammetry experiment, in millivolts
+		:param endingPotential: The endingPotential parameter is the final potential value in the square
+		wave voltammetry waveform, in millivolts
+		:param scanRate: The scan rate is the rate at which the potential is swept during the voltammetry
+		experiment. It is expressed in millivolts per second (mV/s)
+		:param pulsePotential: The pulsePotential parameter represents the potential at which the pulse is
+		applied during the Square Wave Voltammetry experiment, in millivolts
+		:param pulseFrequency: The pulseFrequency parameter refers to the frequency at which the pulse
+		potential is applied during the Square Wave Voltammetry experiment. It is the number of pulses per
+		unit of time, in Hertz (Hz)
+		:param samplePeriodPulse: When to sample the pulse, amount of ms before the pulse end, in milliseconds.
+		"""
+
+		SWVCommandString = "SWV," + str(settlingTime) + "," + str(startingPotential) + "," + \
+			str(endingPotential) + "," + str(scanRate) + "," + str(pulsePotential) + "," + \
+			str(pulseFrequency) + "," + str(samplePeriodPulse)
+		try:
+			self.sendCommandToMCU(SWVCommandString)
+		except Exception as e:
+			raise Exception("Could not send the Square Wave Voltammetry to the OpenAFE device. Reason: ", e)
+
+
 	def receiveVoltammetryPoints(self):
 		"""
 		The function `receiveVoltammetryPoints` receives messages from OpenAFE, processes the received
