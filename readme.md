@@ -8,7 +8,7 @@ This script talks to a device running [OpenAFE Comm](), giving the device the ne
 ![plotterexample](https://github.com/ig-66/OpenAFE_PythonPlotter/blob/main/images/openafeplotter.png)
 
 # External Requirements
-- An Arduino Uno running [OpenAFE Comm]().
+- An Arduino Uno running [OpenAFE Comm](https://github.com/ig-66/openAFEComm).
 - An OpenAFE Shield.
 
 # How to Use
