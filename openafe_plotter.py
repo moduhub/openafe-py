@@ -6,18 +6,18 @@
 # Comment or de-comment the voltammetry type as needed.
 
 # COM port:
-COM_PORT = "COM6" # The COM port to which the Arduino is connected
+COM_PORT = "COM14" # The COM port to which the Arduino is connected
 
 # Parameters:
-# voltammetryType = "CV" # Cyclic Voltammetry
+voltammetryType = "CV" # Cyclic Voltammetry
 # voltammetryType = "DPV" # Differential Pulse Voltammetry
-voltammetryType = "SW" # Square Wave
+# voltammetryType = "SW" # Square Wave
 
 startingPotential_millivolts = -500
 endingPotential_millivolts = 500
 scanRate_millivoltsPerSecond = 200
-stepSize_millivolts = 2
-numberOfCycles = 3
+stepSize_millivolts = 5
+numberOfCycles = 2
 settlingTime_milliseconds = 1000
 
 pulsePotential_millivolts = 100
@@ -41,31 +41,78 @@ from collections import deque
 from openafe import OpenAFE
 
 def plotPoints(queVoltage, queCurrent):
-	"""
-	The function "plotPoints" plots points on a graph and sets the y-axis range.
-	
-	:param queVoltage: The queVoltage parameter represents the list of voltage values that you want to
-	plot on the x-axis. Each value in the list corresponds to a point on the plot
-	:param queCurrent: The queCurrent parameter represents the list of current values that you want to
-	plot on the y-axis. Each value in the list corresponds to a specific point on the plot
-	"""
-	plt.clf()
-	plt.suptitle(graphTitle)
-	plt.title(graphSubTitle)
-	plt.xlabel('Voltage (mV)')
-	plt.ylabel('Current (uA)')
-	plt.grid(visible=gridVisible)
+    """
+    Plots the voltammetry points, changing color based on the cycle and whether the voltage is increasing or decreasing.
+    
+    :param queVoltage: List of voltage values to plot on the x-axis.
+    :param queCurrent: List of current values to plot on the y-axis.
+    """
 
-	# PLOTTING THE POINTS
-	plt.plot(queVoltage, queCurrent)
+    plt.clf()
+    plt.suptitle(graphTitle)
+    plt.title(graphSubTitle)
+    plt.xlabel('Voltage (mV)')
+    plt.ylabel('Current (uA)')
+    plt.grid(visible=gridVisible)
 
-	# SET Y AXIS RANGE
-	plt.xlim(startingPotential_millivolts - 100, endingPotential_millivolts + 100)
+    # Define colors for each cycle
+    cycle_colors = [
+        ("blue", "red"),    # Cycle 1: (ascending, descending)
+        ("green", "purple"),  # Cycle 2: (ascending, descending)
+        ("orange", "cyan"),  # Cycle 3: (ascending, descending)
+        ("black", "magenta")  # Cycle 4: (ascending, descending)
+    ]
 
-	# DRAW, PAUSE AND CLEAR
-	plt.draw()
-	plt.pause(0.05)
+    # Identificar os pontos onde os ciclos começam
+    cycleBoundaries = [0]  # O primeiro ciclo sempre começa no índice 0
+    for i in range(1, len(queVoltage) - 1):
+        # Detecta o início de um novo ciclo (quando a tensão retorna ao ponto inicial)
+        if queVoltage[i - 1] > queVoltage[i] and queVoltage[i] <= startingPotential_millivolts:
+            cycleBoundaries.append(i)
 
+    numCycles = len(cycleBoundaries)
+
+    if numCycles > len(cycle_colors):
+        print(f"Warning: More cycles detected ({numCycles}) than colors available. Colors will repeat.")
+
+    # Criar lista para a legenda
+    legend_handles = []  # Lista para armazenar os identificadores das linhas na legenda
+    legend_labels = []   # Lista para armazenar os nomes dos ciclos na legenda
+
+    # Plotando os segmentos com cores de acordo com o ciclo correto
+    cycleIndex = 0
+    for i in range(1, len(queVoltage)):
+        # Verifica se entramos em um novo ciclo
+        if cycleIndex < len(cycleBoundaries) - 1 and i >= cycleBoundaries[cycleIndex + 1]:
+            cycleIndex += 1  # Avança para o próximo ciclo
+
+        # Seleciona as cores corretas do ciclo atual
+        ascending_color, descending_color = cycle_colors[cycleIndex % len(cycle_colors)]
+
+        # Determina a cor com base na variação de tensão
+        color = ascending_color if queVoltage[i] > queVoltage[i - 1] else descending_color
+
+        # Plota o segmento e adiciona à legenda apenas uma vez por ciclo
+        line, = plt.plot([queVoltage[i - 1], queVoltage[i]], [queCurrent[i - 1], queCurrent[i]], color=color)
+
+        if color == ascending_color and f"Ciclo {cycleIndex+1} - Subida" not in legend_labels:
+            legend_handles.append(line)
+            legend_labels.append(f"Ciclo {cycleIndex+1} - Subida")
+
+        elif color == descending_color and f"Ciclo {cycleIndex+1} - Descida" not in legend_labels:
+            legend_handles.append(line)
+            legend_labels.append(f"Ciclo {cycleIndex+1} - Descida")
+
+    # Configuração dos limites do eixo X
+    plt.xlim(startingPotential_millivolts - 100, endingPotential_millivolts + 100)
+
+    # Adicionar legenda ao gráfico
+    plt.legend(legend_handles, legend_labels, loc="upper right")
+
+    # Atualiza o gráfico
+    plt.draw()
+    plt.pause(0.05)
+    
 # ***** ***** ***** Callbacks ***** ***** *****
 def onVoltammetryPoint(voltage, current):
 	"""
@@ -79,7 +126,7 @@ def onVoltammetryPoint(voltage, current):
 	queVoltage.append(voltage)
 	queCurrent.append(current)
 
-	if len(queVoltage) % 20 == 0: 
+	if len(queVoltage) % 5 == 0: 
 		plotPoints(queVoltage, queCurrent)
 
 
@@ -96,8 +143,8 @@ def onVoltammetryEnd():
 # ***** ***** ***** MAIN ***** ***** *****:
 
 # MAX NO. OF POINTS TO STORE
-queVoltage = deque(maxlen = 2000)
-queCurrent = deque(maxlen = 2000)
+queVoltage = deque(maxlen = 10000)
+queCurrent = deque(maxlen = 10000)
 
 try:
 	openAFE_device = OpenAFE(COM_PORT, onVoltammetryPoint, onVoltammetryEnd)
